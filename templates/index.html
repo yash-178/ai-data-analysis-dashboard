@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Data Analysis Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+          <path d="M4 20V10M12 20V4M20 20V14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <span class="brand-title">DataLens</span>
+        <span class="brand-subtitle">AI Analysis Dashboard</span>
+      </div>
+    </div>
+
+    <nav class="nav" id="nav">
+      <button class="nav-item active" data-section="dashboard">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none"><rect x="3" y="3" width="7" height="9" rx="1.5" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="3" width="7" height="5" rx="1.5" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="12" width="7" height="9" rx="1.5" stroke="currentColor" stroke-width="1.8"/><rect x="3" y="16" width="7" height="5" rx="1.5" stroke="currentColor" stroke-width="1.8"/></svg>
+        <span>Dashboard</span>
+      </button>
+      <button class="nav-item" data-section="dataset">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none"><ellipse cx="12" cy="5" rx="8" ry="3" stroke="currentColor" stroke-width="1.8"/><path d="M4 5v14c0 1.66 3.58 3 8 3s8-1.34 8-3V5" stroke="currentColor" stroke-width="1.8"/><path d="M4 12c0 1.66 3.58 3 8 3s8-1.34 8-3" stroke="currentColor" stroke-width="1.8"/></svg>
+        <span>Dataset</span>
+      </button>
+      <button class="nav-item" data-section="cleaning">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none"><path d="M14.5 3.5l6 6-9 9-6.5 1 1-6.5 9-9z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M3 21h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <span>Data Cleaning</span>
+      </button>
+      <button class="nav-item" data-section="visualizations">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none"><path d="M4 19V5M4 19h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><rect x="7" y="11" width="2.6" height="6" rx="0.5" fill="currentColor"/><rect x="12.5" y="7" width="2.6" height="10" rx="0.5" fill="currentColor"/><rect x="18" y="13" width="2.6" height="4" rx="0.5" fill="currentColor"/></svg>
+        <span>Visualizations</span>
+      </button>
+      <button class="nav-item" data-section="insights">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none"><path d="M9 18h6M10 22h4M12 2a6 6 0 00-3.5 10.9c.6.45.95 1.16.95 1.9V15h5.1v-.2c0-.74.35-1.45.95-1.9A6 6 0 0012 2z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+        <span>AI Insights</span>
+      </button>
+      <button class="nav-item" data-section="report">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M14 2v6h6" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 13h6M9 17h6M9 9h1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <span>Report</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="dataset-chip" id="sidebarDatasetChip">
+        <span class="dot"></span>
+        <span id="sidebarDatasetName">No dataset loaded</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN CONTENT ============ -->
+  <main class="main">
+
+    <header class="topbar">
+      <div class="topbar-title">
+        <h1 id="pageTitle">Dashboard</h1>
+        <p id="pageSubtitle">Overview of your uploaded dataset</p>
+      </div>
+      <div class="topbar-actions">
+        <label class="btn btn-primary" for="fileInput">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none"><path d="M12 3v13m0 0l-4.5-4.5M12 16l4.5-4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          Upload Dataset
+        </label>
+        <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" hidden>
+      </div>
+    </header>
+
+    <div id="toastContainer" class="toast-container"></div>
+
+    <div class="content">
+
+      <!-- ===================== DASHBOARD SECTION ===================== -->
+      <section class="page active" id="page-dashboard">
+        <div id="dashboardEmpty" class="empty-state">
+          <div class="empty-icon">
+            <svg viewBox="0 0 24 24" width="42" height="42" fill="none"><path d="M4 20V10M12 20V4M20 20V14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </div>
+          <h2>No dataset yet</h2>
+          <p>Upload a CSV or Excel file to unlock the dashboard, cleaning tools, visualizations, and AI insights.</p>
+          <label class="btn btn-primary" for="fileInput">Upload a dataset</label>
+        </div>
+
+        <div id="dashboardContent" class="hidden">
+          <div class="kpi-grid" id="kpiGrid"></div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-header">
+                <h3>Column Data Types</h3>
+              </div>
+              <div class="card-body" id="dtypeTableWrap"></div>
+            </div>
+            <div class="card">
+              <div class="card-header">
+                <h3>Missing Values by Column</h3>
+              </div>
+              <div class="card-body" id="missingTableWrap"></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3>Dataset Preview</h3>
+              <span class="card-header-meta">First 10 rows</span>
+            </div>
+            <div class="card-body table-scroll" id="previewTableWrap"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== DATASET SECTION ===================== -->
+      <section class="page" id="page-dataset">
+        <div id="datasetGate" class="empty-state"><h2>No dataset yet</h2><p>Upload a dataset to explore it here.</p></div>
+        <div id="datasetContent" class="hidden">
+
+          <div class="card">
+            <div class="card-header">
+              <h3>Statistical Summary</h3>
+              <span class="card-header-meta">Numeric columns</span>
+            </div>
+            <div class="card-body table-scroll" id="numericStatsWrap"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3>Categorical Summary</h3>
+              <span class="card-header-meta">Unique values &amp; top category</span>
+            </div>
+            <div class="card-body table-scroll" id="categoricalStatsWrap"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3>Search &amp; Filter</h3>
+            </div>
+            <div class="card-body">
+              <div class="filter-bar">
+                <div class="filter-group grow">
+                  <label>Search across dataset</label>
+                  <input type="text" id="searchInput" placeholder="Type to search all columns…">
+                </div>
+                <div class="filter-group">
+                  <label>Filter column</label>
+                  <select id="filterColumn"></select>
+                </div>
+                <div class="filter-group">
+                  <label>Operator</label>
+                  <select id="filterOperator">
+                    <option value="equals">Equals</option>
+                    <option value="not_equals">Not equals</option>
+                    <option value="contains">Contains</option>
+                    <option value="greater_than">Greater than</option>
+                    <option value="less_than">Less than</option>
+                    <option value="greater_or_equal">Greater or equal</option>
+                    <option value="less_or_equal">Less or equal</option>
+                  </select>
+                </div>
+                <div class="filter-group">
+                  <label>Value</label>
+                  <input type="text" id="filterValue" placeholder="value">
+                </div>
+                <button class="btn btn-secondary" id="applyFilterBtn">Apply Filter</button>
+                <button class="btn btn-ghost" id="clearFilterBtn">Clear</button>
+              </div>
+              <div class="filter-meta" id="filterMeta"></div>
+              <div class="table-scroll" id="filterResultsWrap"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== DATA CLEANING SECTION ===================== -->
+      <section class="page" id="page-cleaning">
+        <div id="cleaningGate" class="empty-state"><h2>No dataset yet</h2><p>Upload a dataset to run cleaning diagnostics.</p></div>
+        <div id="cleaningContent" class="hidden">
+
+          <div class="kpi-grid kpi-grid-4" id="cleaningKpis"></div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-header"><h3>Missing Values</h3></div>
+              <div class="card-body table-scroll" id="cleaningMissingWrap"></div>
+            </div>
+            <div class="card">
+              <div class="card-header"><h3>Column Types</h3></div>
+              <div class="card-body" id="cleaningTypesWrap"></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3>Cleaning Options</h3>
+              <span class="card-header-meta">Choose operations, then apply</span>
+            </div>
+            <div class="card-body">
+              <div class="cleaning-options">
+                <label class="checkbox-row">
+                  <input type="checkbox" id="optDropDuplicates" checked>
+                  <span>Remove duplicate rows</span>
+                </label>
+                <label class="checkbox-row">
+                  <input type="checkbox" id="optTrimWhitespace" checked>
+                  <span>Trim whitespace in text columns</span>
+                </label>
+                <label class="checkbox-row">
+                  <input type="checkbox" id="optConvertDates">
+                  <span>Auto-detect and convert date columns</span>
+                </label>
+
+                <div class="option-row">
+                  <label>Standardize text case</label>
+                  <select id="optCaseMode">
+                    <option value="none">No change</option>
+                    <option value="lower">lowercase</option>
+                    <option value="upper">UPPERCASE</option>
+                  </select>
+                </div>
+
+                <div class="option-row">
+                  <label>Missing value strategy</label>
+                  <select id="optMissingStrategy">
+                    <option value="none">Leave as-is</option>
+                    <option value="mean">Fill numeric with mean</option>
+                    <option value="median">Fill numeric with median</option>
+                    <option value="zero">Fill numeric with zero</option>
+                    <option value="mode">Fill with most frequent value</option>
+                    <option value="drop_rows">Drop rows with missing values</option>
+                    <option value="drop_columns">Drop columns above missing threshold</option>
+                  </select>
+                </div>
+
+                <div class="option-row" id="thresholdRow" style="display:none;">
+                  <label>Missing threshold (%)</label>
+                  <input type="number" id="optMissingThreshold" value="50" min="1" max="99">
+                </div>
+              </div>
+
+              <div class="btn-row">
+                <button class="btn btn-primary" id="applyCleaningBtn">Apply Selected Cleaning</button>
+                <button class="btn btn-secondary" id="autoCleanBtn">One-Click Auto Clean</button>
+                <button class="btn btn-ghost" id="resetCleaningBtn">Reset to Original</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><h3>Cleaning Log</h3></div>
+            <div class="card-body">
+              <ul class="log-list" id="cleaningLogList">
+                <li class="log-empty">No cleaning actions applied yet.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== VISUALIZATIONS SECTION ===================== -->
+      <section class="page" id="page-visualizations">
+        <div id="vizGate" class="empty-state"><h2>No dataset yet</h2><p>Upload a dataset to build charts.</p></div>
+        <div id="vizContent" class="hidden">
+
+          <div class="card">
+            <div class="card-header"><h3>Build a Chart</h3></div>
+            <div class="card-body">
+              <div class="filter-bar">
+                <div class="filter-group">
+                  <label>Chart type</label>
+                  <select id="chartType">
+                    <option value="bar">Bar Chart</option>
+                    <option value="line">Line Chart</option>
+                    <option value="pie">Pie Chart</option>
+                    <option value="histogram">Histogram</option>
+                    <option value="scatter">Scatter Plot</option>
+                    <option value="heatmap">Correlation Heatmap</option>
+                  </select>
+                </div>
+                <div class="filter-group" id="xColGroup">
+                  <label id="xColLabel">X Axis / Column</label>
+                  <select id="xCol"></select>
+                </div>
+                <div class="filter-group" id="yColGroup">
+                  <label>Y Axis</label>
+                  <select id="yCol"></select>
+                </div>
+                <div class="filter-group" id="colorColGroup">
+                  <label>Color (optional)</label>
+                  <select id="colorCol"><option value="">None</option></select>
+                </div>
+                <div class="filter-group" id="aggGroup">
+                  <label>Aggregation</label>
+                  <select id="aggFn">
+                    <option value="mean">Mean</option>
+                    <option value="sum">Sum</option>
+                    <option value="count">Count</option>
+                    <option value="max">Max</option>
+                    <option value="min">Min</option>
+                  </select>
+                </div>
+                <button class="btn btn-primary" id="generateChartBtn">Generate Chart</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><h3>Chart Output</h3></div>
+            <div class="card-body">
+              <div id="chartOutput" class="chart-output">
+                <div class="chart-placeholder">Configure options above and click "Generate Chart".</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== AI INSIGHTS SECTION ===================== -->
+      <section class="page" id="page-insights">
+        <div id="insightsGate" class="empty-state"><h2>No dataset yet</h2><p>Upload a dataset to generate AI insights.</p></div>
+        <div id="insightsContent" class="hidden">
+          <div class="insights-toolbar">
+            <p>Automatically generated using rule-based statistical analysis — trends, correlations, outliers, and recommendations.</p>
+            <button class="btn btn-secondary" id="refreshInsightsBtn">Refresh Insights</button>
+          </div>
+          <div class="insights-grid" id="insightsGrid"></div>
+        </div>
+      </section>
+
+      <!-- ===================== REPORT SECTION ===================== -->
+      <section class="page" id="page-report">
+        <div id="reportGate" class="empty-state"><h2>No dataset yet</h2><p>Upload a dataset to generate a report.</p></div>
+        <div id="reportContent" class="hidden">
+          <div class="card report-card">
+            <div class="card-header"><h3>Downloadable Analysis Report</h3></div>
+            <div class="card-body">
+              <p class="report-desc">
+                Generate a professional PDF report containing the dataset summary, data-quality
+                findings, key statistics, correlations, and AI-generated insights — ready to
+                include in your portfolio or share with stakeholders.
+              </p>
+              <ul class="report-includes">
+                <li>Dataset summary &amp; shape</li>
+                <li>Missing values &amp; cleaning actions applied</li>
+                <li>Key statistics per numeric column</li>
+                <li>Strong correlations</li>
+                <li>Full AI insights panel</li>
+              </ul>
+              <button class="btn btn-primary btn-lg" id="downloadReportBtn">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none"><path d="M12 3v13m0 0l-4.5-4.5M12 16l4.5-4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                Download PDF Report
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<div class="loading-overlay hidden" id="loadingOverlay">
+  <div class="spinner"></div>
+  <p id="loadingText">Processing…</p>
+</div>
+
+<script src="{{ url_for('static', filename='js/api.js') }}"></script>
+<script src="{{ url_for('static', filename='js/dataset.js') }}"></script>
+<script src="{{ url_for('static', filename='js/cleaning.js') }}"></script>
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+<script src="{{ url_for('static', filename='js/insights.js') }}"></script>
+<script src="{{ url_for('static', filename='js/report.js') }}"></script>
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

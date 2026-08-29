@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Flask
+instance/
+.flask_session/
+
+# Uploaded / generated files
+uploads/*
+!uploads/.gitkeep
+
+# OS / Editor
+.DS_Store
+.vscode/
+.idea/
+*.swp
+
+# Environment variables
+.env
