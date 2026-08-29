@@ -55,44 +55,6 @@ ai-data-analysis-dashboard/
 └── uploads/                    # (empty — reserved for future disk-based storage)
 ```
 
----
-
-## 🚀 Getting Started
-
-### 1. Prerequisites
-- Python 3.9+
-- pip
-
-### 2. Clone / copy the project, then set up a virtual environment (recommended)
-
-```bash
-cd ai-data-analysis-dashboard
-python3 -m venv venv
-
-# macOS / Linux
-source venv/bin/activate
-
-# Windows
-venv\Scripts\activate
-```
-
-### 3. Install dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-### 4. Run the app
-
-```bash
-python app.py
-```
-
-The app starts a local development server. Open your browser to:
-
-```
-http://127.0.0.1:5000
-```
 
 ### 5. Use it
 1. Click **Upload Dataset** and choose a `.csv`, `.xlsx`, or `.xls` file.
